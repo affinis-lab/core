@@ -1,0 +1,58 @@
+{
+    "models" :
+    {
+      "road": {
+        "enabled":               true,
+        "image_h":               250,
+        "image_w":               800,
+        "image_channels":        3
+      },
+
+      "traffic_light": {
+        "enabled":               true,
+        "anchors":               [0.24,0.75, 0.80,2.22],
+        "max_obj":               1,
+        "grid_h":                13,
+        "grid_w":                13,
+        "num_classes":           2,
+        "classes":               ["go, stop"]
+      },
+
+      "car": {
+        "enabled":               true,
+        "anchors":               [0.57273, 0.677385, 1.87446, 2.06253],
+        "max_obj":               7,
+        "grid_h":                13,
+        "grid_w":                13,
+        "num_classes":           1,
+        "classes":               ["car"]
+      },
+
+      "person": {
+        "enabled":               true,
+        "anchors":               [0.57273, 0.677385, 1.87446, 2.06253],
+        "max_obj":               7,
+        "grid_h":                13,
+        "grid_w":                13,
+        "num_classes":           1,
+        "classes":               ["person"]
+      }
+    },
+
+    "num_models":                3,
+    "fc_after":                  false,
+
+    "train": {
+        "train_image_folder":   "E:\\python_workspace\\autonomous-car-core\\data\\images\\",
+        "train_annot_file":     "trainval.json",
+
+        "train_times":          8,
+        "pretrained_weights":   "full_yolo_kangaroo3.h5",
+        "batch_size":           4,
+        "learning_rate":        1e-4,
+        "nb_epochs":            20,
+
+        "saved_weights_name":   "full_yolo_kangaroo.h5",
+        "debug":                true
+    }
+}

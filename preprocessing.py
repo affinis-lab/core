@@ -3,7 +3,6 @@ import json
 import numpy as np
 import os
 
-from utils import load_image
 from utils import load_modules
 from utils import save_image
 
@@ -23,6 +22,11 @@ def load_data(name):
         data = json.load(f)
 
     return data
+
+
+def load_image(dir, name):
+    img = cv2.imread(os.path.join(dir, 'images', name))
+    return cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
 
 def process(model, pre_fun, post_fun, data, image=False):
