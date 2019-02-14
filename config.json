@@ -1,25 +1,32 @@
 {
     "models" :
     {
-      "road": {
+      "road_seg_module": {
         "enabled":               true,
         "image_h":               250,
         "image_w":               800,
         "image_channels":        3
       },
 
-      "traffic_light": {
+      "traffic_light_module": {
         "enabled":               true,
+        "image_h":               416,
+        "image_w":               416,
         "anchors":               [0.24,0.75, 0.80,2.22],
         "max_obj":               1,
         "grid_h":                13,
         "grid_w":                13,
         "num_classes":           2,
-        "classes":               ["go, stop"]
+        "classes":               ["go", "stop"],
+        "obj_thresh":            0.20,
+        "nms_thresh":            0.01,
+        "saved_model_name":      "traffic-light-model.h5"
       },
 
-      "car": {
+      "car_module": {
         "enabled":               true,
+        "image_h":               416,
+        "image_w":               416,
         "anchors":               [0.57273, 0.677385, 1.87446, 2.06253],
         "max_obj":               7,
         "grid_h":                13,
@@ -28,8 +35,10 @@
         "classes":               ["car"]
       },
 
-      "person": {
+      "person_module": {
         "enabled":               true,
+        "image_h":               416,
+        "image_w":               416,
         "anchors":               [0.57273, 0.677385, 1.87446, 2.06253],
         "max_obj":               7,
         "grid_h":                13,
@@ -47,12 +56,12 @@
         "train_annot_file":     "trainval.json",
 
         "train_times":          8,
-        "pretrained_weights":   "full_yolo_kangaroo3.h5",
+        "pretrained_weights":   "",
         "batch_size":           4,
         "learning_rate":        1e-4,
         "nb_epochs":            20,
 
-        "saved_weights_name":   "full_yolo_kangaroo.h5",
+        "saved_weights_name":   "",
         "debug":                true
     }
 }

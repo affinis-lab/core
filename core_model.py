@@ -9,7 +9,7 @@ def get_core_model(config, plot_core_model=False):
     Image input
     '''
 
-    image_input = Input(shape=(config['models']['road']['image_h'], config['models']['road']['image_w'], config['models']['road']['image_channels']))
+    image_input = Input(shape=(config['models']['road_seg_module']['image_h'], config['models']['road_seg_module']['image_w'], config['models']['road_seg_module']['image_channels']))
 
     # Conv layer 1
     x = Conv2D(32, (3, 3), strides=(1, 1), padding='same', name='conv_1', use_bias=False)(image_input)
@@ -54,7 +54,7 @@ def get_core_model(config, plot_core_model=False):
     if config['fc_after']:
         vector_input_fc_layers = []
         for key in config['models'].keys():
-            if config['models'][key]['enabled'] and key != 'road':
+            if config['models'][key]['enabled'] and key != 'road_seg_module':
                 shape = config['models'][key]['max_obj'] * (4 + 1 + config['models'][key]['num_classes'])
 
                 vector_input = Input(shape=(shape,))
@@ -77,7 +77,7 @@ def get_core_model(config, plot_core_model=False):
     else:
         shape = 0
         for key in config['models'].keys():
-            if config['models'][key]['enabled'] and key != 'road':
+            if config['models'][key]['enabled'] and key != 'road_seg_module':
                 shape += config['models'][key]['max_obj'] * (4 + 1 + config['models'][key]['num_classes'])
                 num_inputs += 1
 

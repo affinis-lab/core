@@ -43,7 +43,7 @@ def load_image(path, conf):
 
         img = cv2.imread(path)
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        img = cv2.resize(img, (conf['models']['road']['image_w'], conf['models']['road']['image_h']))
+        img = cv2.resize(img, (conf['models']['road_seg_module']['image_w'], conf['models']['road_seg_module']['image_h']))
         return img
     except:
         print("Path  " + path + " not found.")
@@ -62,9 +62,9 @@ class BatchGenerator(keras.utils.Sequence):
         self.config = config
         self.dataset = dataset
 
-        self.image_h = config['models']['road']['image_h']
-        self.image_w = config['models']['road']['image_w']
-        self.image_channels = config['models']['road']['image_channels']
+        self.image_h = config['models']['road_seg_module']['image_h']
+        self.image_w = config['models']['road_seg_module']['image_w']
+        self.image_channels = config['models']['road_seg_module']['image_channels']
         #self.grid_h = config['model']['grid_h']
         #self.grid_w = config['model']['grid_w']
 
@@ -148,7 +148,7 @@ class BatchGenerator(keras.utils.Sequence):
         shape = 0
         num_inputs = 0
         for key in self.config['models'].keys():
-            if self.config['models'][key]['enabled'] and key != 'road':
+            if self.config['models'][key]['enabled'] and key != 'road_seg_module':
                 shape += self.config['models'][key]['max_obj'] * (4 + 1 + self.config['models'][key]['num_classes'])
                 num_inputs += 1
 
