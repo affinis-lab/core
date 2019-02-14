@@ -3,12 +3,6 @@
 # Edit at https://www.gitignore.io/?templates=python
 
 ### Data ###
-agents/*
-agents/images/*
-!agents/.gitkeep
-!agents/images/
-!agents/images/.gitkeep
-
 data/*
 data/images/*
 !data/.gitkeep
@@ -141,5 +135,18 @@ dmypy.json
 
 ### Python Patch ###
 .venv/
+
+### VisualStudioCode ###
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+### VisualStudioCode Patch ###
+# Ignore all local history of files
+.history
+
+# End of https://www.gitignore.io/api/visualstudiocode
 
 # End of https://www.gitignore.io/api/python

@@ -4,7 +4,7 @@ from . import postprocessing
 
 
 def get_output_type():
-    return 'vector'
+    return 'image'
 
 
 def get_model():

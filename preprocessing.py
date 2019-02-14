@@ -13,6 +13,9 @@ DATA_DIR = os.path.join(BASE_DIR, 'data')
 OUT_DIR = os.path.join(BASE_DIR, 'out')
 
 
+# TODO: docstrings; command line arguments
+
+
 def load_data(name):
     filename = os.path.join(DATA_DIR, name)
 
@@ -22,26 +25,27 @@ def load_data(name):
     return data
 
 
-def process(model, fun, data, image=False):
+def process(model, pre_fun, post_fun, data, image=False):
     filename = data['image']
     img = load_image(DATA_DIR, filename)
-    x = fun(img)
+    x = pre_fun(img)
     x = np.expand_dims(x, 0)
 
-    res = model.predict(x)
+    res = model.predict(x)[0]
+    res = post_fun(res)
 
     if image:
-        save_image(OUT_DIR, filename, res[0])
+        save_image(OUT_DIR, filename, res)
         return filename
 
-    return res[0]
+    return res
 
 
 def main():
     modules = load_modules()
 
     out = []
-    for data_point in load_data('train.json')[:10]:
+    for data_point in load_data('train.json')[73:74]:
         res = {
             'input': [],
             'label': dict(
@@ -55,7 +59,8 @@ def main():
                 'type': module['type'],
                 'value': process(
                     model=module['model'],
-                    fun=module['fun'],
+                    pre_fun=module['preprocessing'],
+                    post_fun=module['postprocessing'],
                     data=data_point,
                     image=module['type'] == 'image'
                 )

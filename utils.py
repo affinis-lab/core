@@ -24,7 +24,8 @@ def load_modules():
         modules[name] = {
             'type': module.get_output_type(),
             'model': module.get_model(),
-            'fun': module.get_preprocessing_fun(),
+            'preprocessing': module.get_preprocessing_fun(),
+            'postprocessing': module.get_postprocessing_fun(),
         }
 
     return modules
