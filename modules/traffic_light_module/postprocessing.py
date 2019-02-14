@@ -68,6 +68,9 @@ def decode_netout(netout, anchors, nb_class, obj_threshold=0.3, nms_threshold=0.
     # remove the boxes which are less likely than a obj_threshold
     boxes = [box for box in boxes if box.get_score() > obj_threshold]
 
+    boxes = sorted(boxes, key=lambda box: box.get_score(), reverse=True)
+
+    boxes = [boxes[0]]
     return boxes
 
 

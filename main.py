@@ -17,6 +17,7 @@ def main(args):
         config = json.loads(config_buffer.read())
 
     train(config)
+    #tl_predict_example(config)
 
 
 def tl_predict_example(config):
