@@ -13,7 +13,7 @@ def train(config):
     train_generator = BatchGenerator(config, data)
     validation_generator = BatchGenerator(config, data)
 
-    model = get_core_model(config, plot_core_model=False)
+    model = get_core_model(config, plot_core_model=config['plot_core_model'])
 
     # optimizer = SGD(lr=1e-3, momentum=0.9, decay=0.0005)
     # optimizer = RMSprop(lr=1e-3,rho=0.9, epsilon=1e-08, decay=0.0)

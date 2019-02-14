@@ -143,8 +143,6 @@ class BatchGenerator(keras.utils.Sequence):
         inputs = []
         image_input = np.zeros((self.batch_size, self.image_h, self.image_w, self.image_channels))
 
-        #vector_input = np.zeros((self.batch_size, self.max_objects_per_img * (4 + 1 + self.num_classes)))
-
         shape = 0
         num_inputs = 0
         for key in self.config['models'].keys():
@@ -152,6 +150,7 @@ class BatchGenerator(keras.utils.Sequence):
                 shape += self.config['models'][key]['max_obj'] * (4 + 1 + self.config['models'][key]['num_classes'])
                 num_inputs += 1
 
+        #vector_input = np.zeros((self.batch_size, self.max_objects_per_img * (4 + 1 + self.num_classes)))
         vector_input = np.zeros((self.batch_size, shape))
 
         output = np.zeros((self.batch_size, 3))
@@ -161,7 +160,9 @@ class BatchGenerator(keras.utils.Sequence):
         for instance in current_batch:
             concatenated_vectors = []
             for module in instance['input']:
-                if module['type'] == 'image':
+                if not self.config['models'][module['module_name']]['enabled']:
+                    continue
+                elif module['type'] == 'image':
                     image = load_image(module['value'], self.config)
                     image_input[instance_num] = image
                 else:

@@ -48,8 +48,8 @@
       }
     },
 
-    "num_models":                3,
     "fc_after":                  false,
+    "plot_core_model":           true,
 
     "train": {
         "train_image_folder":   "E:\\python_workspace\\autonomous-car-core\\data\\images\\",
