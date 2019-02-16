@@ -18,6 +18,7 @@ def bbox_iou(box1, box2):
 
     return float(intersect) / union
 
+
 def decode_netout(netout, anchors, nb_class, obj_threshold=0.3, nms_threshold=0.3):
     grid_h, grid_w, nb_box = netout.shape[:3]
     #grid_h, grid_w, nb_box = config['models']['traffic_light_module']['grid_h'], GRID_W, BOX
@@ -70,7 +71,7 @@ def decode_netout(netout, anchors, nb_class, obj_threshold=0.3, nms_threshold=0.
 
     boxes = sorted(boxes, key=lambda box: box.get_score(), reverse=True)
 
-    boxes = [boxes[0]]
+    if len(boxes)>0: boxes = [boxes[0]]
     return boxes
 
 
@@ -170,6 +171,7 @@ def _softmax(x, axis=-1, t=-100.):
     e_x = np.exp(x)
 
     return e_x / e_x.sum(axis, keepdims=True)
+
 
 class BoundBox:
     def __init__(self, xmin, ymin, xmax, ymax, c=None, classes=None):
