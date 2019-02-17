@@ -17,6 +17,10 @@ out/images/*
 
 !checkpoints/.gitkeep
 
+_benchmarks_results/
+carla/
+logs/
+
 ### Python ###
 # Byte-compiled / optimized / DLL files
 __pycache__/

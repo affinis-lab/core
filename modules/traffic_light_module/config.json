@@ -1,0 +1,12 @@
+{
+    "pretrained-model": "traffic-light-model.h5",
+    "image-size": {
+        "width": 416,
+        "height": 416
+    },
+    "max-predicted-objects": 1,
+    "anchors": [0.24,0.79, 0.80,2.12],
+    "number-of-classes": 2,
+    "object-threshold": 0.17,
+    "nsm-threshold": 0.01
+}

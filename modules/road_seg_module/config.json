@@ -1,0 +1,7 @@
+{
+    "pretrained-model": "road-seg-model.h5",
+    "image-size": {
+        "width": 800,
+        "height": 288
+    }
+}

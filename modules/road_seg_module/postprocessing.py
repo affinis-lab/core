@@ -1,18 +1,10 @@
 import numpy as np
 
 
-KITTI_ROAD_ENCODING_INVERTED = {
-    0: [  0,   0,   0], # void
-    1: [255, 255, 255], # drivable
-}
-
-
 def fun(res):
     data = []
+    converted = np.array([127, 127, 127])
     for row in res:
-        r = []
-        for pixel in row:
-            index = np.argmax(pixel)
-            r.append(KITTI_ROAD_ENCODING_INVERTED[index])
+        r = [converted * np.argmax(pixel) for pixel in row]
         data.append(r)
     return np.array(data, dtype='uint8')

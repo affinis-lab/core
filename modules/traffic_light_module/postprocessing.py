@@ -75,6 +75,16 @@ def decode_netout(netout, anchors, nb_class, obj_threshold=0.3, nms_threshold=0.
     return boxes
 
 
+def fun(res, anchors, num_classes, obj_threshold, nms_threshold):
+    return decode_netout(
+        netout=res,
+        anchors=anchors,
+        nb_class=num_classes,
+        obj_threshold=obj_threshold,
+        nms_threshold=nms_threshold
+    )
+
+
 def draw_boxes(image, boxes, labels):
     image_h, image_w, _ = image.shape
 
@@ -197,3 +207,12 @@ class BoundBox:
             self.score = self.classes[self.get_label()]
 
         return self.score
+
+    def toJSON(self):
+        return [
+            self.xmin,
+            self.ymin,
+            self.xmax,
+            self.ymax,
+            float(self.score),
+        ] + [float(x) for x in self.classes]

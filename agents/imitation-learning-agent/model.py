@@ -1,15 +1,26 @@
-from keras.layers import Dropout, Conv2D, Input, MaxPooling2D, BatchNormalization, Flatten, Dense, Lambda, Concatenate
+from keras.layers import Dropout
+from keras.layers import Conv2D
+from keras.layers import Input
+from keras.layers import MaxPooling2D
+from keras.layers import BatchNormalization
+from keras.layers import Flatten
+from keras.layers import Dense
+from keras.layers import Lambda
+from keras.layers import Concatenate
 from keras.layers.advanced_activations import LeakyReLU
 from keras.models import Model
 from keras.utils import plot_model
 
 
-def get_core_model(config, plot_core_model=False):
+def build(config, plot_core_model=False):
     '''
     Image input
     '''
 
-    image_input = Input(shape=(config['models']['road_seg_module']['image_h'], config['models']['road_seg_module']['image_w'], config['models']['road_seg_module']['image_channels']))
+    height = config['models']['road_seg_module']['image-size']['height']
+    width = config['models']['road_seg_module']['image-size']['width']
+    channels = config['models']['road_seg_module']['image-channels']
+    image_input = Input(shape=(height, width, channels))
 
     # Conv layer 1
     x = Conv2D(32, (3, 3), strides=(1, 1), padding='same', name='conv_1', use_bias=False)(image_input)
@@ -55,7 +66,7 @@ def get_core_model(config, plot_core_model=False):
         vector_input_fc_layers = []
         for key in config['models'].keys():
             if config['models'][key]['enabled'] and key != 'road_seg_module':
-                shape = config['models'][key]['max_obj'] * (4 + 1 + config['models'][key]['num_classes'])
+                shape = config['models'][key]['max_obj'] * (4 + 1 + config['models'][key]['number-of-classes'])
 
                 vector_input = Input(shape=(shape,))
 
@@ -78,7 +89,7 @@ def get_core_model(config, plot_core_model=False):
         shape = 0
         for key in config['models'].keys():
             if config['models'][key]['enabled'] and key != 'road_seg_module':
-                shape += config['models'][key]['max_obj'] * (4 + 1 + config['models'][key]['num_classes'])
+                shape += config['models'][key]['max-predicted-objects'] * (4 + 1 + config['models'][key]['number-of-classes'])
                 num_inputs += 1
 
         vector_input = Input(shape=(shape,))
@@ -109,14 +120,5 @@ def get_core_model(config, plot_core_model=False):
     output = Dense(units=3, activation='softmax', name='output')(x)
 
     vector_inputs.append(image_input)
-    model = Model(vector_inputs, output)
 
-    if plot_core_model:
-        import os
-        os.environ["PATH"] += os.pathsep + 'E:\\graphviz-2.38\\release\\bin'
-
-        plot_model(model, to_file='model' + str(num_inputs)
-                                  + str(config['fc_after']) + '.png',
-                   show_shapes=True, show_layer_names=True)
-
-    return model
+    return Model(vector_inputs, output)

@@ -1,22 +1,22 @@
+import argparse
 import cv2
 import json
+import math
 import numpy as np
 import os
+from datetime import timedelta
+from time import time
 
+from utils import load_image
 from utils import load_modules
 from utils import save_image
 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DATA_DIR = os.path.join(BASE_DIR, 'data')
-OUT_DIR = os.path.join(BASE_DIR, 'out')
 
 
-# TODO: docstrings; command line arguments
-
-
-def load_data(name):
-    filename = os.path.join(DATA_DIR, name)
+def load_data(dir, name):
+    filename = os.path.join(dir, name)
 
     with open(filename, 'r') as f:
         data = json.load(f)
@@ -24,32 +24,33 @@ def load_data(name):
     return data
 
 
-def load_image(dir, name):
-    img = cv2.imread(os.path.join(dir, 'images', name))
-    return cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-
-
-def process(model, pre_fun, post_fun, data, image=False):
-    filename = data['image']
-    img = load_image(DATA_DIR, filename)
+def process(img, model, pre_fun, post_fun):
     x = pre_fun(img)
-    x = np.expand_dims(x, 0)
-
     res = model.predict(x)[0]
-    res = post_fun(res)
-
-    if image:
-        save_image(OUT_DIR, filename, res)
-        return filename
-
-    return res
+    return post_fun(res)
 
 
-def main():
-    modules = load_modules()
+def main(args):
+    with open(args.conf, 'r') as f:
+        config = json.load(f)
+
+    modules = load_modules(config['models'])
+
+    input_dir = config['preprocessing']['input-dir']
+    input_file = config['preprocessing']['input-file']
+    output_dir = config['preprocessing']['output-dir']
+    output_file = config['preprocessing']['output-file']
+
+    input_image_dir = os.path.join(input_dir, 'images')
+    output_image_dir = os.path.join(output_dir, 'images')
 
     out = []
-    for data_point in load_data('train.json')[73:74]:
+    times = []
+
+    data = load_data(input_dir, input_file)
+    n = len(data)
+
+    for step, data_point in enumerate(data):
         res = {
             'input': [],
             'label': dict(
@@ -57,25 +58,56 @@ def main():
             ),
         }
 
+        img = load_image(input_image_dir, data_point['image'])
+
         for module_name, module in modules.items():
+            start = time()
+
+            x = process(
+                img=img,
+                model=module['model'],
+                pre_fun=module['preprocessing'],
+                post_fun=module['postprocessing']
+            )
+
+            if module['type'] == 'image':
+                save_image(output_image_dir, module['image'], x)
+                x = module['image']
+
             res['input'].append({
                 'module_name': module_name,
                 'type': module['type'],
-                'value': process(
-                    model=module['model'],
-                    pre_fun=module['preprocessing'],
-                    post_fun=module['postprocessing'],
-                    data=data_point,
-                    image=module['type'] == 'image'
-                )
+                'value': x
             })
 
         out.append(res)
+        times.append(time() - start)
 
-    filename = os.path.join(OUT_DIR, 'trainval.json')
+        print_progress(step + 1, n, sum(times) / len(times), n - step - 1)
+
+    filename = os.path.join(output_dir, output_file)
     with open(filename, 'w') as f:
         json.dump(out, f, indent=2)
 
+    print(f'Total time to convert {n} images is {timedelta(seconds=sum(times))}')
+
+
+def print_progress(step, n, time_per_step, remaining_steps):
+    progress = f'Processing image {step}/{n}'
+    tps = f'TPS: {time_per_step}s'
+    eta = f'ETA: {timedelta(seconds=remaining_steps * time_per_step)}s'
+    print(f'\r{progress}\t\t{tps}\t\t{eta}')
+
 
 if __name__ == "__main__":
-    main()
+    arg_parser = argparse.ArgumentParser(
+        description='Control CARLA vehicle using pretrained agent')
+
+    arg_parser.add_argument(
+        '-c',
+        '--conf',
+        help='path to the configuration file',
+        default='config.json',
+    )
+
+    main(arg_parser.parse_args())

@@ -3,28 +3,33 @@
     {
       "road_seg_module": {
         "enabled":               true,
-        "image_h":               250,
-        "image_w":               800,
-        "image_channels":        3
+        "pretrained-model": "road-seg-model.h5",
+        "image-size": {
+            "width": 800,
+            "height": 288
+        },
+        "image-channels": 3
       },
 
       "traffic_light_module": {
         "enabled":               true,
-        "image_h":               416,
-        "image_w":               416,
+        "pretrained-model": "traffic-light-model.h5",
+        "image-size": {
+            "width": 416,
+            "height": 416
+        },
         "anchors":               [0.24,0.79, 0.80,2.12],
-        "max_obj":               1,
-        "grid_h":                13,
-        "grid_w":                13,
-        "num_classes":           2,
+        "max-predicted-objects": 1,
+        "number-of-classes":           2,
         "classes":               ["go", "stop"],
-        "obj_thresh":            0.20,
-        "nms_thresh":            0.01,
-        "saved_model_name":      "traffic-light-model.h5"
+        "object-threshold":      0.17,
+        "nms-threshold":         0.01,
+        "grid_h":                13,
+        "grid_w":                13
       },
 
       "car_module": {
-        "enabled":               true,
+        "enabled":               false,
         "image_h":               416,
         "image_w":               416,
         "anchors":               [0.57273, 0.677385, 1.87446, 2.06253],
@@ -36,7 +41,7 @@
       },
 
       "person_module": {
-        "enabled":               true,
+        "enabled":               false,
         "image_h":               416,
         "image_w":               416,
         "anchors":               [0.57273, 0.677385, 1.87446, 2.06253],
@@ -49,19 +54,26 @@
     },
 
     "fc_after":                  false,
-    "plot_core_model":           true,
+    "plot_core_model":           false,
 
     "train": {
-        "train_image_folder":   "E:\\python_workspace\\autonomous-car-core\\data\\images\\",
-        "train_annot_file":     "trainval.json",
+        "data-folder":   "/home/alex/projects/affinis-lab/autonomous-vehicle/core/out",
+        "data-file":     "trainval.json",
 
         "train_times":          8,
         "pretrained_weights":   "",
-        "batch_size":           4,
+        "batch_size":           16,
         "learning_rate":        1e-4,
-        "nb_epochs":            20,
+        "nb_epochs":            12,
 
         "saved_weights_name":   "",
         "debug":                true
+    },
+
+    "preprocessing": {
+      "input-dir": "/home/alex/projects/affinis-lab/autonomous-vehicle/core/data",
+      "input-file": "train.json",
+      "output-dir": "/home/alex/projects/affinis-lab/autonomous-vehicle/core/out",
+      "output-file": "trainval.json"
     }
 }
