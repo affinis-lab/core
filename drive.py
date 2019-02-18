@@ -1,6 +1,7 @@
 import argparse
 import json
 import numpy as np
+import cv2
 
 from carla.agent.agent import Agent
 from carla.carla_server_pb2 import Control
@@ -21,7 +22,6 @@ class ControlAgent(Agent):
 
     def process(self, img):
         image_input, vector_inputs = None, []
-
         for module in self.modules.values():
             x = module['preprocessing'](img)
             res = module['model'].predict(x)[0]
@@ -32,7 +32,7 @@ class ControlAgent(Agent):
             else:
                 vector_inputs.append(y)
 
-        return [image_input, np.concatenate(vector_inputs)]
+        return [np.concatenate(vector_inputs), image_input]
 
     def predict(self, input_tensor):
         return self.model.predict(input_tensor)[0]
@@ -40,6 +40,7 @@ class ControlAgent(Agent):
     def run_step(self, measurements, sensor_data, directions, target):
         img = sensor_data['CameraRGB'].data
         res = self.process(img)
+        res[1] = np.expand_dims(cv2.resize(res[1], (800, 250)), 0)
         pred = self.predict(res)
 
         steer, acc, brake = pred[0], pred[1], pred[2]
