@@ -15,8 +15,6 @@ class BatchGenerator(Sequence):
         self.image_h = config['models']['road_seg_module']['image-size']['height']
         self.image_w = config['models']['road_seg_module']['image-size']['width']
         self.image_channels = config['models']['road_seg_module']['image-channels']
-        #self.grid_h = config['model']['grid_h']
-        #self.grid_w = config['model']['grid_w']
 
         self.batch_size = self.config['train']['batch_size']
         self.shuffle = shuffle
@@ -90,49 +88,86 @@ class BatchGenerator(Sequence):
 
     def __getitem__(self, index):
         'Generate one batch of data'
-        inputs = []
+
         image_input = np.zeros((self.batch_size, self.image_h, self.image_w, self.image_channels))
-
-        shape = 0
-        num_inputs = 0
-        for key in self.config['models'].keys():
-            if self.config['models'][key]['enabled'] and key != 'road_seg_module':
-                shape += self.config['models'][key]['max_obj'] * (4 + 1 + self.config['models'][key]['num_classes'])
-                num_inputs += 1
-
-        #vector_input = np.zeros((self.batch_size, self.max_objects_per_img * (4 + 1 + self.num_classes)))
-        vector_input = np.zeros((self.batch_size, shape))
-
         output = np.zeros((self.batch_size, 3))
+        num_inputs = 0
 
-        current_batch = self.dataset[index * self.batch_size:(index + 1) * self.batch_size]
-        instance_num = 0
-        for instance in current_batch:
-            concatenated_vectors = []
-            for module in instance['input']:
-                if not self.config['models'][module['module_name']]['enabled']:
-                    continue
-                elif module['type'] == 'image':
-                    image = load_image(module['value'], self.config)
-                    image_input[instance_num] = image
-                else:
-                    input_num = 0
-                    max_obj = self.config['models'][module['module_name']]['max_obj']
-                    for i in range(max_obj): #vector in module['value'][:max_obj]:
-                        if i < len(module['value']):
-                            concatenated_vectors += module['value'][i]
-                        else:
-                            concatenated_vectors += [0 for i in range(4 + 1 + self.config['models'][module['module_name']]['num_classes'])]
-                        input_num += 1
+        if not self.config['fc_after']:
 
-            label = [instance['label']['steer'], instance['label']['throttle'], instance['label']['brake']]
-            vector_input[instance_num] = concatenated_vectors
-            output[instance_num] = label
+            shape = 0
+            for key in self.config['models'].keys():
+                if self.config['models'][key]['enabled'] and key != 'road_seg_module':
+                    shape += self.config['models'][key]['max_obj'] * (4 + 1 + self.config['models'][key]['num_classes'])
+                    num_inputs += 1
 
-            instance_num += 1
+            vector_input = np.zeros((self.batch_size, shape))
 
-        #vector_input = vector_input.reshape((self.batch_size, self.max_objects_per_img * (4 + 1 + self.num_classes)))
-        return [vector_input, image_input], output
+            current_batch = self.dataset[index * self.batch_size:(index + 1) * self.batch_size]
+            instance_num = 0
+            for instance in current_batch:
+                concatenated_vectors = []
+                for module in instance['input']:
+                    if not self.config['models'][module['module_name']]['enabled']:
+                        continue
+                    elif module['type'] == 'image':
+                        image = load_image(module['value'], self.config)
+                        image_input[instance_num] = image
+                    else:
+                        input_num = 0
+                        max_obj = self.config['models'][module['module_name']]['max_obj']
+                        for i in range(max_obj):
+                            if i < len(module['value']):
+                                concatenated_vectors += module['value'][i]
+                            else:
+                                concatenated_vectors += [0 for i in range(4 + 1 + self.config['models'][module['module_name']]['num_classes'])]
+                            input_num += 1
+
+                label = [instance['label']['steer'], instance['label']['throttle'], instance['label']['brake']]
+                vector_input[instance_num] = concatenated_vectors
+                output[instance_num] = label
+
+                instance_num += 1
+
+            return [vector_input, image_input], output
+
+        else:
+            vector_inputs = []
+            for key in self.config['models'].keys():
+                if self.config['models'][key]['enabled'] and key != 'road_seg_module':
+                    shape = self.config['models'][key]['max_obj'] * (4 + 1 + self.config['models'][key]['num_classes'])
+                    vector_inputs.append(np.zeros((self.batch_size, shape)))
+                    num_inputs += 1
+
+            current_batch = self.dataset[index * self.batch_size:(index + 1) * self.batch_size]
+
+            instance_num = 0
+            for instance in current_batch:
+                detection_module_num = 0
+                for module in instance['input']:
+                    if not self.config['models'][module['module_name']]['enabled']:
+                        continue
+                    elif module['type'] == 'image':
+                        image = load_image(module['value'], self.config)
+                        image_input[instance_num] = image
+                    else:
+                        concatenated_vectors = []
+                        input_num = 0
+                        max_obj = self.config['models'][module['module_name']]['max_obj']
+                        for i in range(max_obj):
+                            if i < len(module['value']):
+                                concatenated_vectors += module['value'][i]
+                            else:
+                                concatenated_vectors += [0 for i in range(4 + 1 + self.config['models'][module['module_name']]['num_classes'])]
+                            input_num += 1
+
+                        vector_inputs[detection_module_num][instance_num] = concatenated_vectors
+                        detection_module_num += 1
+
+                label = [instance['label']['steer'], instance['label']['throttle'], instance['label']['brake']]
+                output[instance_num] = label
+
+            return vector_inputs + [image_input], output
 
 
     def on_epoch_end(self):

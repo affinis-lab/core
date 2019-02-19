@@ -15,11 +15,13 @@ out/images/*
 !out/images/
 !out/images/.gitkeep
 
+checkpoints/*
 !checkpoints/.gitkeep
+agents/imitation-learning-agent/checkpoints/*
 
-_benchmarks_results/
-carla/
-logs/
+logs/*
+
+*.png
 
 ### Python ###
 # Byte-compiled / optimized / DLL files

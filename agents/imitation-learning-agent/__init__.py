@@ -39,16 +39,18 @@ def init(config):
     val_gen = BatchGenerator(config, val_set)
 
     model = build(config, plot_core_model=config['plot_core_model'])
-    model.load_weights()
+    #model.load_weights()
+
+    model.summary()
 
     # optimizer = SGD(lr=1e-3, momentum=0.9, decay=0.0005)
     # optimizer = RMSprop(lr=1e-3,rho=0.9, epsilon=1e-08, decay=0.0)
-    optimizer = Adam(lr=1e-3, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0)
+    optimizer = Adam(lr=0.0002, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0)
 
     model.compile(
         loss='mean_squared_error',
         optimizer=optimizer,
-        metrics=['mae', r_square]
+        metrics=['mae', r_square, 'acc']
     )
 
     checkpoint_dir = os.path.join(BASE_DIR, 'checkpoints')
@@ -74,7 +76,7 @@ def init(config):
             validation_data=val_gen,
             epochs=config['train']['nb_epochs'],
             workers=10,
-            use_multiprocessing=True,
+            #use_multiprocessing=True,
             shuffle=True,
             verbose=1,
             callbacks=[checkpoint, tensorboard],
