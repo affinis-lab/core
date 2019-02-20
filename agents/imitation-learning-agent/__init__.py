@@ -2,7 +2,7 @@ import json
 import os
 from keras.models import load_model
 from keras.optimizers import SGD, Adam, RMSprop
-from keras.callbacks import EarlyStopping, ModelCheckpoint, TensorBoard
+from keras.callbacks import EarlyStopping, ModelCheckpoint, TensorBoard, ReduceLROnPlateau
 from sklearn.model_selection import train_test_split
 
 from .model import build
@@ -45,7 +45,8 @@ def init(config):
 
     # optimizer = SGD(lr=1e-3, momentum=0.9, decay=0.0005)
     # optimizer = RMSprop(lr=1e-3,rho=0.9, epsilon=1e-08, decay=0.0)
-    optimizer = Adam(lr=0.0002, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0)
+    optimizer = Adam(lr=0.0002, beta_1=0.7, beta_2=0.85, epsilon=1e-08, decay=0.0)
+
 
     model.compile(
         loss='mean_squared_error',
@@ -64,6 +65,8 @@ def init(config):
         period = 1
     )
 
+    reduce_lr_callback = ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=3, verbose=0, min_lr=0.0000001)#, min_lr=0.000001)
+
     batch_size = config['train']['batch_size']
     tensorboard = TensorBoard(
         batch_size=batch_size,
@@ -79,7 +82,7 @@ def init(config):
             #use_multiprocessing=True,
             shuffle=True,
             verbose=1,
-            callbacks=[checkpoint, tensorboard],
+            callbacks=[checkpoint, tensorboard, reduce_lr_callback],
         )
 
         return model, history
