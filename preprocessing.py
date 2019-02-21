@@ -51,6 +51,8 @@ def main(args):
     n = len(data)
 
     for step, data_point in enumerate(data):
+        start = time()
+        
         res = {
             'input': [],
             'label': dict(
@@ -61,8 +63,6 @@ def main(args):
         img = load_image(input_image_dir, data_point['image'])
 
         for module_name, module in modules.items():
-            start = time()
-
             x = process(
                 img=img,
                 model=module['model'],
@@ -71,8 +71,8 @@ def main(args):
             )
 
             if module['type'] == 'image':
-                save_image(output_image_dir, module['image'], x)
-                x = module['image']
+                save_image(output_image_dir, data_point['image'], x)
+                x = data_point['image']
 
             res['input'].append({
                 'module_name': module_name,
@@ -94,9 +94,9 @@ def main(args):
 
 def print_progress(step, n, time_per_step, remaining_steps):
     progress = f'Processing image {step}/{n}'
-    tps = f'TPS: {time_per_step}s'
+    tps = f'TPS: {time_per_step:.2f}s'
     eta = f'ETA: {timedelta(seconds=remaining_steps * time_per_step)}s'
-    print(f'\r{progress}\t\t{tps}\t\t{eta}')
+    print(f'\r{progress}\t\t{tps}\t\t{eta}', end=' ')
 
 
 if __name__ == "__main__":

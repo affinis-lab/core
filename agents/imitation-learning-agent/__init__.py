@@ -5,7 +5,7 @@ from keras.optimizers import SGD, Adam, RMSprop
 from keras.callbacks import EarlyStopping, ModelCheckpoint, TensorBoard, ReduceLROnPlateau
 from sklearn.model_selection import train_test_split
 
-from .model import build
+from .model import build, eliot_sig
 from .generator import BatchGenerator
 from .utils import r_square
 
@@ -24,7 +24,7 @@ def load_data(dir, name):
 
 def load(name):
     path = os.path.join(BASE_DIR, 'pretrained', name)
-    return load_model(path, compile=False)
+    return load_model(path, compile=False, custom_objects={ 'eliot_sig': eliot_sig })
 
 
 def init(config):
@@ -39,8 +39,6 @@ def init(config):
     val_gen = BatchGenerator(config, val_set)
 
     model = build(config, plot_core_model=config['plot_core_model'])
-    #model.load_weights()
-
     model.summary()
 
     # optimizer = SGD(lr=1e-3, momentum=0.9, decay=0.0005)
@@ -79,7 +77,7 @@ def init(config):
             validation_data=val_gen,
             epochs=config['train']['nb_epochs'],
             workers=10,
-            #use_multiprocessing=True,
+            use_multiprocessing=False,
             shuffle=True,
             verbose=1,
             callbacks=[checkpoint, tensorboard, reduce_lr_callback],

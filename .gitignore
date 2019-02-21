@@ -20,8 +20,13 @@ checkpoints/*
 agents/imitation-learning-agent/checkpoints/*
 
 logs/*
+carla/*
+_benchmarks_results/*
 
+*.h5
 *.png
+
+config.json
 
 ### Python ###
 # Byte-compiled / optimized / DLL files

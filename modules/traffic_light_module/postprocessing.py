@@ -72,7 +72,8 @@ def decode_netout(netout, anchors, nb_class, obj_threshold=0.3, nms_threshold=0.
     boxes = sorted(boxes, key=lambda box: box.get_score(), reverse=True)
 
     if len(boxes)>0:
-        boxes = [boxes[0]]
+        b = boxes[0]
+        boxes = [[b.xmin, b.ymin, b.xmax, b.ymax, float(b.score)] + [float(x) for x in b.classes]]
     else:
         boxes = [[0, 0, 0, 0, 0, 0, 0]]
     return boxes

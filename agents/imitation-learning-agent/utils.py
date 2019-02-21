@@ -6,7 +6,11 @@ def load_image(name, conf):
     path = os.path.join(conf['train']['data-folder'], 'images', name)
     img = cv2.imread(path)
     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-    img = cv2.resize(img, (conf['models']['road_seg_module']['image-size']['width'], conf['models']['road_seg_module']['image-size']['height']))
+    
+    width = conf['models']['road_seg_module']['image-size']['width']
+    height = conf['models']['road_seg_module']['image-size']['height']
+    img = cv2.resize(img, (width, height))
+    
     return img
 
 

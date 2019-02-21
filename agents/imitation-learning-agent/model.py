@@ -1,3 +1,4 @@
+import keras.backend as K
 from keras.layers import Dropout
 from keras.layers import Conv2D
 from keras.layers import Input
@@ -10,7 +11,14 @@ from keras.layers import Concatenate
 from keras.layers import ReLU
 from keras.layers.advanced_activations import LeakyReLU
 from keras.models import Model
-from keras.utils import plot_model
+
+
+def sigmoid(x):
+    return 2. / (1. + K.exp(-x)) - 1
+
+
+def eliot_sig(x):
+    return x / (1 + K.abs(x))
 
 
 def build(config, plot_core_model=False):
@@ -90,24 +98,18 @@ def build(config, plot_core_model=False):
 
     # Fully connected layer 2
     x = fc_block(x, units=512, dropuout=0.5, batch_norm=True)
-    #x = fc_block(x, units=512, dropuout=0.5, batch_norm=True)
+    x = fc_block(x, units=512, dropuout=0.5, batch_norm=True)
+
+    steer_output = Dense(units=1, activation=eliot_sig, name='steer_output')(x)
 
     # Output layer
-    output = Dense(units=3, activation='softmax', name='output')(x)
+    acc_brake_output = Dense(units=2, activation='softmax', name='acc_brake_output')(x)
+
+    output = Concatenate()([steer_output, acc_brake_output])
 
     vector_inputs.append(image_input)
 
-    model = Model(vector_inputs, output)
-
-    if plot_core_model:
-        import os
-        os.environ["PATH"] += os.pathsep + 'E:\\graphviz-2.38\\release\\bin'
-
-        plot_model(model, to_file='model' + str(num_inputs)
-                                  + str(config['fc_after']) + '.png',
-                   show_shapes=True, show_layer_names=True)
-
-    return model
+    return Model(vector_inputs, output)
 
 
 def conv_block(x, filters, kernel, stride, layer_num, pooling = False):
