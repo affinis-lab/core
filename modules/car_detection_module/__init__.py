@@ -30,7 +30,7 @@ def load(config):
             default_config['anchors'],
             default_config['number-of-classes'],
             default_config['object-threshold'],
-            default_config['nms-threshold']
+            default_config['nsm-threshold']
         ),
     }
 

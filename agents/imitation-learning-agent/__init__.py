@@ -5,9 +5,11 @@ from keras.optimizers import SGD, Adam, RMSprop
 from keras.callbacks import EarlyStopping, ModelCheckpoint, TensorBoard, ReduceLROnPlateau
 from sklearn.model_selection import train_test_split
 
-from .model import build, eliot_sig
+from .model import build
 from .generator import BatchGenerator, BatchGeneratorStateful
-from .utils import r_square, load_stateful_data
+from .utils import eliot_sig
+from .utils import load_stateful_data
+from .utils import r_square
 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
