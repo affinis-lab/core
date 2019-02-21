@@ -57,6 +57,14 @@
       }
     },
 
+    "lstm": {
+      "enabled": false,
+      "num_episodes_train": 140,
+      "num_episodes_val": 10,
+      "images_per_episode": 200
+    },
+
+
     "fc_after":                  false,
     "plot_core_model":           true,
 
