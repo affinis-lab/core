@@ -89,7 +89,7 @@ def main(args):
     with open(filename, 'w') as f:
         json.dump(out, f, indent=2)
 
-    print(f'Total time to convert {n} images is {timedelta(seconds=sum(times))}')
+    print(f'\nTotal time to convert {n} images is {timedelta(seconds=sum(times))}')
 
 
 def print_progress(step, n, time_per_step, remaining_steps):
