@@ -96,7 +96,9 @@ def train_lstm(config, data):
 
     # train_set, val_set = train_test_split(data, test_size=0.1, random_state=99)
 
-    train_set, val_set = data[:140], data[140:]
+    train_set, val_set = data[:config['lstm']['num_episodes_train']], data[config['lstm']['num_episodes_train']:]
+
+    print('data ', len(data))
 
     train_gen = BatchGeneratorStateful(config, train_set, config['lstm']['num_episodes_train'])
     val_gen = BatchGeneratorStateful(config, val_set, config['lstm']['num_episodes_val'])

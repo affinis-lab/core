@@ -199,7 +199,7 @@ class BatchGeneratorStateful(Sequence):
 
     def __len__(self):
         'Denotes the number of batches per epoch'
-        return int(np.ceil(float(len(self.dataset)) / self.config['train']['batch_size'])) * int (self.images_per_episode)
+        return int(np.ceil(float(len(self.dataset)) * int(self.images_per_episode)) / self.config['train']['batch_size'])
 
     def __getitem__(self, index):
         'Generate one batch of data'
@@ -216,10 +216,20 @@ class BatchGeneratorStateful(Sequence):
 
         vector_input = np.zeros((self.batch_size, shape))
 
+        if self.current_episode >= self.num_episodes:
+            self.current_episode = self.num_episodes-1
+
         print('\nbatch cnt = ', self.batch_counter, ' step cnt = ', self.step_counter, 'episode cnt = ', self.current_episode)
 
-        current_batch = self.dataset[self.current_episode][self.batch_counter * self.batch_size:(self.batch_counter + 1) * self.batch_size]
+        l_bound = self.batch_counter * self.batch_size
+        r_bound = (self.batch_counter + 1) * self.batch_size
+
+        if r_bound > self.images_per_episode:
+            r_bound = self.images_per_episode
+            l_bound = r_bound - self.batch_size
+
         instance_num = 0
+        current_batch = self.dataset[self.current_episode][l_bound:r_bound]
         for instance in current_batch:
             concatenated_vectors = []
             for module in instance['input']:
@@ -269,8 +279,10 @@ class BatchGeneratorStateful(Sequence):
         self.batch_counter = 0
         self.current_episode = 0
 
+
     def normalize(self, image):
         return image / 255.
+
 
     def size(self):
         return len(self.dataset)
