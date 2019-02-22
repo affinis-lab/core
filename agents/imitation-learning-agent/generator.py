@@ -260,7 +260,6 @@ class BatchGeneratorStateful(Sequence):
 
             instance_num += 1
 
-
         if self.step_counter >= self.images_per_episode:
             self.batch_counter = 0
             self.step_counter = 0

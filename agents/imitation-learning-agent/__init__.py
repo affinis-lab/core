@@ -40,7 +40,7 @@ def train_normal(config, data):
 
     # optimizer = SGD(lr=1e-3, momentum=0.9, decay=0.0005)
     # optimizer = RMSprop(lr=1e-3,rho=0.9, epsilon=1e-08, decay=0.0)
-    optimizer = Adam(lr=0.002, beta_1=0.7, beta_2=0.85, epsilon=1e-08, decay=0.0)
+    optimizer = Adam(lr=0.0002, beta_1=0.7, beta_2=0.85, epsilon=1e-08, decay=0.0)
 
     model.compile(
         loss='mean_squared_error',  # mean_squared_logarithmic_error
@@ -93,6 +93,7 @@ def train_normal(config, data):
 
     return res
 
+
 def train_lstm(config, data):
     data = load_stateful_data(data, config)
 
@@ -108,9 +109,11 @@ def train_lstm(config, data):
     model = build(config, plot_core_model=config['plot_core_model'])
     model.summary()
 
-    optimizer = SGD(lr=0.0002, momentum=0.9, decay=0.0005)
-    # optimizer = RMSprop(lr=1e-3,rho=0.9, epsilon=1e-08, decay=0.0)
-    # optimizer = Adam(lr=0.002, decay=0.0005)
+    # good with version 1
+    #optimizer = SGD(lr=0.0002, decay=1e-6, momentum=0.9, nesterov=True, clipnorm=5)
+    optimizer = RMSprop(lr=0.0002,rho=0.9, epsilon=1e-08, decay=1e-6)
+    #optimizer = Adam(lr=0.0002, beta_1=0.7, beta_2=0.85, epsilon=1e-08, decay=1e-6, amsgrad=True)
+    #optimizer = Adam(lr=0.002, decay=0.0005)
 
     model.compile(
         loss='mean_squared_error',  # mean_squared_logarithmic_error

@@ -16,6 +16,7 @@ from keras.layers.advanced_activations import LeakyReLU
 from keras.activations import tanh
 from keras.models import Model
 from keras.utils import plot_model
+import math
 
 from .utils import eliot_sig, sigmoid
 
@@ -124,40 +125,28 @@ def lstm_model(config, plot_core_model):
     width = config['models']['road_seg_module']['image-size']['width']
     channels = config['models']['road_seg_module']['image-channels']
 
-    image_input = Input(shape=(height, width, channels))
+    image_input = Input(shape=(height, width, channels), batch_shape=(8, height, width, channels))
 
     # Conv block 1
     x = conv_block(image_input, filters=32, kernel=5, stride=4, layer_num=1, pooling=False)
     x = conv_block(x, filters=32, kernel=3, stride=1, layer_num=2, pooling=False)
 
     # Conv block 2
-    x = conv_block(x, filters=64, kernel=3, stride=2, layer_num=3, pooling=False)
+    x = conv_block(x, filters=64, kernel=3, stride=4, layer_num=3, pooling=False)
     x = conv_block(x, filters=64, kernel=3, stride=1, layer_num=4, pooling=False)
 
     # Conv block 3
-    x = conv_block(x, filters=128, kernel=3, stride=2, layer_num=5, pooling=False)
+    x = conv_block(x, filters=128, kernel=3, stride=4, layer_num=5, pooling=False)
     x = conv_block(x, filters=128, kernel=3, stride=1, layer_num=6, pooling=False)
 
     # Conv block 4
-    x = conv_block(x, filters=256, kernel=3, stride=2, layer_num=7, pooling=False)
+    x = conv_block(x, filters=256, kernel=3, stride=1, layer_num=7, pooling=False)
     x = conv_block(x, filters=256, kernel=3, stride=1, layer_num=8, pooling=False)
 
-    convolved_h = int(x.shape[1])
-    convolved_w = int(x.shape[2])
-
-    conv_to_rnn_dims = (convolved_w, (convolved_h * 256))
-
-    x = Reshape(target_shape=conv_to_rnn_dims, name='reshape')(x)
-
-    # cuts down input size going into RNN:
-    x = fc_block(x, units=512, dropuout=0.5, batch_norm=True)
-
-    x = lstm_block(x)
     x = Flatten()(x)
 
-    '''
-    Concatenate road segmentation image wither other modules inputs
-    '''
+    # Fully connected layer 1
+    x = fc_block(x, units=512, dropuout=0.5, batch_norm=True)
 
     # One fully connected layer for each input
     num_inputs = 0
@@ -192,7 +181,7 @@ def lstm_model(config, plot_core_model):
                 shape += config['models'][key]['max_obj'] * (4 + 1 + config['models'][key]['num_classes'])
                 num_inputs += 1
 
-        vector_input = Input(shape=(shape,))
+        vector_input = Input(shape=(shape,), batch_shape=(8,shape))
         vector_inputs.append(vector_input)
 
         # Concatenate segmented image features vector and bounding boxes/confidence/class vectors
@@ -200,6 +189,12 @@ def lstm_model(config, plot_core_model):
 
     x = fc_block(x, units=512, dropuout=0.5)
     x = fc_block(x, units=512, dropuout=0.5)
+
+    conv_to_rnn_dims = (8, 64)
+    x = Reshape(target_shape=conv_to_rnn_dims, name='reshape')(x)
+
+    x = lstm_block(x)
+    x = Flatten()(x)
 
     steer_output = Dense(units=1, activation=eliot_sig, name='steer_output')(x)
 
@@ -222,7 +217,7 @@ def lstm_model(config, plot_core_model):
     return model
 
 
-def conv_block(x, filters, kernel, stride, layer_num, pooling = False):
+def conv_block(x, filters, kernel, stride, layer_num, pooling=False):
     x = Conv2D(filters, (kernel, kernel), strides=(stride, stride), padding='same', name='conv_' + str(layer_num), use_bias=False)(x)
     x = BatchNormalization(name='norm_' + str(layer_num))(x)
     x = ReLU()(x)
@@ -241,21 +236,25 @@ def fc_block(x, units, dropuout, batch_norm=True):
 
 def lstm_block(x):
     # Two layers of bidirectional LSTMs
-    gru_1 = CuDNNLSTM(512, return_sequences=True, kernel_initializer='he_normal', name='gru1')(x)
-    gru_1b = CuDNNLSTM(512, return_sequences=True,  kernel_initializer='he_normal', name='gru1_b')(x)   #go_backwards=True,
+    # kernel_initializer='he_normal',
 
-    gru1_merged = add([gru_1, gru_1b])
+    lstm_1 = CuDNNLSTM(512, return_sequences=True,  stateful=False,  name='lstm_1')(x)
+    #lstm_1 = Dropout(0.1)(lstm_1)
+    lstm_1b = CuDNNLSTM(512, return_sequences=True,  stateful=False, name='lstm_1b')(x)
+    #lstm_1b = Dropout(0.1)(lstm_1b)
 
-    gru_2 = CuDNNLSTM(512, return_sequences=True, kernel_initializer='he_normal', name='gru2')(gru1_merged)
-    gru_2b = CuDNNLSTM(512, return_sequences=True,  kernel_initializer='he_normal', name='gru2_b')(gru1_merged)
+    x = add([lstm_1, lstm_1b])
+    #x = Dropout(0.2)(x)
 
-    x = concatenate([gru_2, gru_2b])
+    lstm_2 = CuDNNLSTM(512, return_sequences=True,  stateful=False, name='lstm_2')(x)
+    #lstm_2 = Dropout(0.1)(lstm_2)
 
-    #x = CuDNNLSTM(1024, return_sequences=True, kernel_initializer='he_normal', name='gru1')(x)
-    #x = CuDNNLSTM(512, return_sequences=True, kernel_initializer='he_normal', name='gru2')(x)
+    lstm_2b = CuDNNLSTM(512, return_sequences=True,   stateful=False, name='lstm_2b')(x)
+    #lstm_2b = Dropout(0.1)(lstm_2b)
 
-    print(x.shape)
+    x = concatenate([lstm_2, lstm_2b])
 
     x = TimeDistributed(Dense(512, activation='relu'), name='output')(x)
+    #x = Dropout(0.2)(x)
 
     return x
