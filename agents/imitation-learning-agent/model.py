@@ -17,13 +17,7 @@ from keras.activations import tanh
 from keras.models import Model
 from keras.utils import plot_model
 
-
-def sigmoid(x):
-    return 2. / (1. + K.exp(-x)) - 1
-
-
-def eliot_sig(x):
-    return x / (1 + K.abs(x))
+from .utils import eliot_sig, sigmoid
 
 
 def build(config, plot_core_model=False):
