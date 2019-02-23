@@ -79,12 +79,12 @@ def decode_netout(max_obj, netout, anchors, nb_class, obj_threshold=0.3, nms_thr
         boxes = [[b.xmin, b.ymin, b.xmax, b.ymax, float(b.score)] + [float(x) for x in b.classes]]
         iterator = len(boxes)
         while (iterator < max_obj):
-            boxes.append([0, 0, 0, 0, 0, 0, 0])
+            boxes.append([0, 0, 0, 0, 0, 0])
             iterator += 1
     else:
         iterator = 0
         while (iterator < max_obj):
-            boxes.append([0, 0, 0, 0, 0, 0, 0])
+            boxes.append([0, 0, 0, 0, 0, 0])
             iterator += 1
 
     return boxes

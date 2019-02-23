@@ -1,6 +1,5 @@
 import argparse
 import json
-import matplotlib.pyplot as plt
 
 from utils import load_agent
 
