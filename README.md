@@ -17,5 +17,5 @@
 
 **Prediction samples:**
 
-![Gif 1](https://github.com/affinis-lab/car-detection-module/blob/master/images/car_image1.png)
+![Gif 1](https://github.com/affinis-lab/core/blob/master/gifs/LeftTurn.gif)
 ![Gif 2](https://github.com/affinis-lab/car-detection-module/blob/master/images/car_image2.png)
