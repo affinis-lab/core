@@ -71,7 +71,7 @@ class BatchGenerator(Sequence):
                         continue
                     elif module['type'] == 'image':
                         image = load_image(module['value'], self.config)
-                        # image = self.augment.augment_image(image)
+                        image = self.augment.augment_image(image)
                         image_input[instance_num] = image
                     else:
                         input_num = 0
@@ -80,7 +80,7 @@ class BatchGenerator(Sequence):
                             if i < len(module['value']):
                                 if module['value'][i][5] > 0:
                                     module['value'][i][5] = 1.0
-                                else:
+                                elif len(module['value'][i]) > 6:
                                     module['value'][i][6] = 1.0
                                 concatenated_vectors += module['value'][i]
                             else:
@@ -113,7 +113,7 @@ class BatchGenerator(Sequence):
                         continue
                     elif module['type'] == 'image':
                         image = load_image(module['value'], self.config)
-                        # image = self.augment.augment_image(image)
+                        image = self.augment.augment_image(image)
                         image_input[instance_num] = image
                     else:
                         concatenated_vectors = []
@@ -123,7 +123,7 @@ class BatchGenerator(Sequence):
                             if i < len(module['value']):
                                 if module['value'][i][5] > 0:
                                     module['value'][i][5] = 1.0
-                                else:
+                                elif len(module['value'][i]) > 6:
                                     module['value'][i][6] = 1.0
                                 concatenated_vectors += module['value'][i]
                             else:
@@ -219,7 +219,7 @@ class BatchGeneratorStateful(Sequence):
         if self.current_episode >= self.num_episodes:
             self.current_episode = self.num_episodes-1
 
-        print('\nbatch cnt = ', self.batch_counter, ' step cnt = ', self.step_counter, 'episode cnt = ', self.current_episode)
+        # print('\nbatch cnt = ', self.batch_counter, ' step cnt = ', self.step_counter, 'episode cnt = ', self.current_episode)
 
         l_bound = self.batch_counter * self.batch_size
         r_bound = (self.batch_counter + 1) * self.batch_size
@@ -237,7 +237,7 @@ class BatchGeneratorStateful(Sequence):
                     continue
                 elif module['type'] == 'image':
                     image = load_image(module['value'], self.config)
-                    # image = self.augment.augment_image(image)
+                    image = self.augment.augment_image(image)
                     image_input[instance_num] = image
                 else:
                     input_num = 0
@@ -246,7 +246,7 @@ class BatchGeneratorStateful(Sequence):
                         if i < len(module['value']):
                             if module['value'][i][5] > 0:
                                 module['value'][i][5] = 1.0
-                            else:
+                            elif len(module['value'][i]) > 6:
                                 module['value'][i][6] = 1.0
                             concatenated_vectors += module['value'][i]
                         else:

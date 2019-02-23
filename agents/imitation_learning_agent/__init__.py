@@ -111,7 +111,7 @@ def train_lstm(config, data):
 
     # good with version 1
     #optimizer = SGD(lr=0.0002, decay=1e-6, momentum=0.9, nesterov=True, clipnorm=5)
-    optimizer = RMSprop(lr=0.0002,rho=0.9, epsilon=1e-08, decay=1e-6)
+    optimizer = RMSprop(lr=0.001,rho=0.9, epsilon=1e-08, decay=1e-6)
     #optimizer = Adam(lr=0.0002, beta_1=0.7, beta_2=0.85, epsilon=1e-08, decay=1e-6, amsgrad=True)
     #optimizer = Adam(lr=0.002, decay=0.0005)
 
@@ -146,7 +146,7 @@ def train_lstm(config, data):
             generator=train_gen,
             validation_data=val_gen,
             epochs=config['train']['nb_epochs'],
-            # workers=10,
+            workers=10,
             use_multiprocessing=False,
             shuffle=True,
             verbose=1,

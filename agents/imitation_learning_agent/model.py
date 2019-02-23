@@ -125,7 +125,7 @@ def lstm_model(config, plot_core_model):
     width = config['models']['road_seg_module']['image-size']['width']
     channels = config['models']['road_seg_module']['image-channels']
 
-    image_input = Input(shape=(height, width, channels), batch_shape=(8, height, width, channels))
+    image_input = Input(shape=(height, width, channels))
 
     # Conv block 1
     x = conv_block(image_input, filters=32, kernel=5, stride=4, layer_num=1, pooling=False)
@@ -181,7 +181,7 @@ def lstm_model(config, plot_core_model):
                 shape += config['models'][key]['max_obj'] * (4 + 1 + config['models'][key]['num_classes'])
                 num_inputs += 1
 
-        vector_input = Input(shape=(shape,), batch_shape=(8,shape))
+        vector_input = Input(shape=(shape,))
         vector_inputs.append(vector_input)
 
         # Concatenate segmented image features vector and bounding boxes/confidence/class vectors
