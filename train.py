@@ -9,7 +9,7 @@ def train(args):
     with open(args.conf, 'r') as f:
         config = json.load(f)
 
-    agent = load_agent('imitation-learning-agent').init(config)
+    agent = load_agent(config['agent']).init(config)
     agent.train()
 
 

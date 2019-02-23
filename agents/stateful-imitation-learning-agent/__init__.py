@@ -6,8 +6,9 @@ from keras.callbacks import EarlyStopping, ModelCheckpoint, TensorBoard, ReduceL
 from sklearn.model_selection import train_test_split
 
 from .model import build
-from .generator import BatchGenerator
+from .generator import BatchGeneratorStateful
 from .utils import eliot_sig
+from .utils import load_stateful_data
 from .utils import r_square
 
 
@@ -34,18 +35,24 @@ def init(config):
         name=config['train']['data-file']
     )
 
-    train_set, val_set = train_test_split(data, test_size=0.1, random_state=99)
+    data = load_stateful_data(data, config)
 
-    train_gen = BatchGenerator(config, train_set)
-    val_gen = BatchGenerator(config, val_set)
+    # train_set, val_set = train_test_split(data, test_size=0.1, random_state=99)
+
+    train_set, val_set = data[:config['lstm']['num_episodes_train']], data[config['lstm']['num_episodes_train']:]
+
+    print('data ', len(data))
+
+    train_gen = BatchGeneratorStateful(config, train_set, config['lstm']['num_episodes_train'])
+    val_gen = BatchGeneratorStateful(config, val_set, config['lstm']['num_episodes_val'])
 
     model = build(config, plot_core_model=config['plot_core_model'])
     model.summary()
 
-    #optimizer = SGD(lr=0.0002, beta_1=0.7, beta_2=0.85, epsilon=1e-08, decay=1e-6, amsgrad=True)
-    #optimizer = SGD(lr=0.0002, decay=1e-6, momentum=0.9, nesterov=True, clipnorm=5)
+    # optimizer = SGD(lr=0.0002, decay=1e-6, momentum=0.9, nesterov=True, clipnorm=5)
     optimizer = RMSprop(lr=0.001, rho=0.9, epsilon=1e-08, decay=1e-6)
-    #optimizer = Adam(lr=0.0002, beta_1=0.7, beta_2=0.85, epsilon=1e-08, decay=0.0)
+    # optimizer = Adam(lr=0.0002, beta_1=0.7, beta_2=0.85, epsilon=1e-08, decay=1e-6, amsgrad=True)
+    # optimizer = Adam(lr=0.002, decay=0.0005)
 
     model.compile(
         loss='mean_squared_error',  # mean_squared_logarithmic_error

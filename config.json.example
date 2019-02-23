@@ -1,4 +1,5 @@
 {
+    "agent": "stateful-imitation-learning-agent",
     "models" :
     {
       "road_seg_module": {

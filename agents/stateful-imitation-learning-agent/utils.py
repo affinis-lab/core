@@ -28,3 +28,24 @@ def sigmoid(x):
 
 def eliot_sig(x):
     return x / (1 + K.abs(x))
+
+
+def load_stateful_data(json_data, config):
+    total_episodes = config['lstm']['num_episodes_train'] + config['lstm']['num_episodes_val']
+    images_per_episode = config['lstm']['images_per_episode']
+
+    stateful_data = [[] for i in range(total_episodes)]
+    episode_images = []
+    episode = 0
+
+    for instance_num, instance in enumerate(json_data):
+        episode_images.append(instance)
+        if instance_num == total_episodes*images_per_episode:
+            return stateful_data
+
+        if (instance_num + 1) % images_per_episode == 0:
+            stateful_data[episode] = episode_images
+            episode_images = []
+            episode += 1
+
+    return stateful_data
